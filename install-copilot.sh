@@ -2,7 +2,19 @@
 
 # Extract VS Code version from code-server
 get_vscode_version() {
-    code-server --version | head -n1
+    local version_output
+    local first_line
+    local parsed_version
+
+    version_output="$(code-server --version)"
+    first_line="$(printf '%s\n' "$version_output" | head -n1)"
+    parsed_version="$(printf '%s\n' "$first_line" | sed -nE 's/.*[Ww]ith[[:space:]]+[Cc]ode[[:space:]]+([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
+
+    if [ -n "$parsed_version" ]; then
+        printf '%s\n' "$parsed_version"
+    else
+        printf '%s\n' "$first_line"
+    fi
 }
 
 # Get user-data-dir from running code-server process
