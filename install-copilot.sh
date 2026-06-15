@@ -170,6 +170,14 @@ echo ""
 # Use portable array declaration
 EXTENSIONS="GitHub.copilot GitHub.copilot-chat"
 FAILED=0
+extension_dir="/usr/lib/code-server/lib/vscode/extensions"
+copilot="$extension_dir/copilot"
+copilot_temp="./copilot-temp"
+
+if [ -d $copilot ]; then
+    echo "  Temporarily move $copilot to $copilot_temp"
+    mv $copilot $copilot_temp
+fi
 
 # Iterate through space-separated list for portability
 for ext in $EXTENSIONS; do
@@ -189,6 +197,11 @@ for ext in $EXTENSIONS; do
     fi
     echo ""
 done
+
+if [ -d $copilot_temp ]; then
+    echo "  Restore $copilot_temp to $copilot"
+    mv $copilot_temp $copilot
+fi
 
 # Summary
 echo "===================================="
