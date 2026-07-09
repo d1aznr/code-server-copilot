@@ -118,6 +118,29 @@ install_extension() {
     return 0
 }
 
+# Check for and request sudo permissions
+request_sudo() {
+    # Check if we already have sudo access
+    if sudo -n true 2>/dev/null; then
+        echo "✓ sudo access confirmed"
+        return 0
+    fi
+
+    echo "This script requires sudo privileges to install extensions."
+    echo "Please enter your password when prompted."
+    echo ""
+
+    # Request sudo with a prompt
+    if sudo -v 2>/dev/null; then
+        echo "✓ sudo access granted"
+        return 0
+    else
+        echo "✗ Failed to obtain sudo privileges"
+        echo "Please run this script with sudo or grant sudo access."
+        exit 1
+    fi
+}
+
 # Check for required dependencies
 check_dependencies() {
     local missing_deps=()
@@ -134,6 +157,11 @@ check_dependencies() {
         missing_deps+=("gunzip/gzip")
     fi
 
+    # Check for sudo
+    if ! command -v sudo >/dev/null 2>&1; then
+        missing_deps+=("sudo")
+    fi
+
     if [ "${#missing_deps[@]}" -gt 0 ]; then
         echo "Error: Missing required dependencies: ${missing_deps[*]}"
         echo "Please install the missing dependencies and try again."
@@ -148,6 +176,9 @@ echo ""
 
 # Check dependencies
 check_dependencies
+
+# Request sudo permissions
+request_sudo
 
 # Get VS Code version
 VSCODE_VERSION="$(get_vscode_version)"
@@ -176,7 +207,7 @@ copilot_temp="./copilot-temp"
 
 if [ -d $copilot ]; then
     echo "  Temporarily move $copilot to $copilot_temp"
-    mv $copilot $copilot_temp
+    sudo mv $copilot $copilot_temp
 fi
 
 # Iterate through space-separated list for portability
@@ -200,7 +231,7 @@ done
 
 if [ -d $copilot_temp ]; then
     echo "  Restore $copilot_temp to $copilot"
-    mv $copilot_temp $copilot
+    sudo mv $copilot_temp $copilot
 fi
 
 # Summary
